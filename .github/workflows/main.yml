@@ -1,0 +1,42 @@
+name: Patch
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: prepare
+        run: |
+          ${{ secrets.PREPARE_CLI }}
+
+      - name: Build tiktok
+        run: |
+          export patch_args="--exclusive \
+            -i settings \
+            -i feed-filter \
+            -i hide-ads \
+            -i playback-speed \
+            -i show-seekbar"
+          export patch_target=tiktok
+          bash patch.sh
+
+      - name: Upload Build Artifact(tiktok)
+        uses: actions/upload-artifact@v3
+        with:
+          name: revanced-tiktok
+          retention-days: 1
+          path: |
+            revanced-tiktok*.apk
